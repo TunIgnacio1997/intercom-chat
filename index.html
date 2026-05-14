@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Intercom</title>
+
+  <!-- CryptoJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+
+  <script>
+
+    // 鈿狅笍 TU SECRET DE INTERCOM
+    const INTERCOM_SECRET = "36xbBBVKUiaeZXnX1mvgNjPxJiosi6sFN3lSMGmE";
+
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
+    }
+
+    // Generar HMAC SHA256
+    function generateUserHash(userId) {
+      return CryptoJS.HmacSHA256(
+        userId,
+        INTERCOM_SECRET
+      ).toString();
+    }
+
+    function bootIntercom() {
+
+      // cerrar sesi贸n anterior
+      if (window.intercomSettings) {
+        Intercom('shutdown');
+      }
+
+      const userId = getParam('user_id');
+
+      // generar hash
+      const userHash = generateUserHash(userId);
+
+      console.log("USER HASH:", userHash);
+
+      Intercom('boot', {
+        app_id: 's48z5ve1',
+
+        // usuario
+        user_id: userId,
+        name: getParam('name'),
+        email: getParam('email'),
+
+        // identity verification
+        user_hash: userHash,
+
+        // empresa
+        company: {
+          id: getParam('company_id'),
+          name: getParam('company_name')
+        }
+      });
+
+      Intercom('show');
+    }
+
+    (function () {
+
+      var w = window;
+      var ic = w.Intercom;
+
+      if (typeof ic === "function") {
+
+        ic('reattach_activator');
+        ic('update', {});
+
+        bootIntercom();
+
+      } else {
+
+        var d = document;
+
+        var i = function () {
+          i.c(arguments);
+        };
+
+        i.q = [];
+
+        i.c = function (args) {
+          i.q.push(args);
+        };
+
+        w.Intercom = i;
+
+        function l() {
+
+          var s = d.createElement('script');
+
+          s.type = 'text/javascript';
+          s.async = true;
+
+          s.src = 'https://widget.intercom.io/widget/s48z5ve1';
+
+          // boot cuando carga el script
+          s.onload = bootIntercom;
+
+          var x = d.getElementsByTagName('script')[0];
+
+          x.parentNode.insertBefore(s, x);
+        }
+
+        if (document.readyState === 'complete') {
+          l();
+        } else {
+          w.addEventListener('load', l, false);
+        }
+      }
+
+    })();
+
+  </script>
+
+</head>
+
+<body>
+
+  <h2>Chat XL SOLAR</h2>
+
+</body>
+</html>
